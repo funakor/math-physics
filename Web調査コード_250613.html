@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2487.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="ja"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="UTF-8" /&gt;</p>
+<p class="p1">&lt;title&gt;数学と理科との関連性についての調査&lt;/title&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>body { font-family: sans-serif; max-width: 900px; margin: auto; padding: 20px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>h1 { text-align: center; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>label { font-weight: bold; display: block; margin-bottom: 8px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>input[type="text"] { font-size: 16px; padding: 6px; width: 100px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>table { border-collapse: collapse; margin-top: 20px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>th, td { border: 2px solid #444; padding: 8px; text-align: center; min-width: 70px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>th { background-color: #eee; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>select { font-size: 16px; width: 60px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>#instructionTable { font-weight: normal; margin-top: 20px; }</p>
+<p class="p1"><span class="Apple-converted-space">  </span>button { font-size: 16px; padding: 10px 20px; margin-top: 20px; cursor: pointer; }</p>
+<p class="p1">&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;h1&gt;数学と理科との関連性についての調査&lt;/h1&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;label for="studentId"&gt;あなたの生徒番号を入力してください．（4桁）&lt;/label&gt;</p>
+<p class="p1">&lt;input type="text" id="studentId" maxlength="4" pattern="\d{4}" placeholder="例: 0123" required /&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;p id="instructionTable"&gt;以下の単語や数式同士にはどのくらい関係があると思いますか．&lt;br&gt;</p>
+<p class="p1">関係があると思う度合いを4段階（0～3）で表の太枠内に記入してください．&lt;/p&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;form id="form"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;table id="table" aria-label="関連性アンケート表"&gt;&lt;/table&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button type="submit"&gt;送信（CSVダウンロード）&lt;/button&gt;</p>
+<p class="p1">&lt;/form&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1">const labels = [</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"フックの法則",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"ばねの伸び = ばね定数 × 力の大きさ",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"オームの法則",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"電圧 = 電流 × 電気抵抗",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"等速直線運動",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"移動距離 = 速さ × 時間",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"比例",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"y = ax",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"変化の割合",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"傾き",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"表",</p>
+<p class="p1"><span class="Apple-converted-space">  </span>"グラフ"</p>
+<p class="p1">];</p>
+<p class="p2"><br></p>
+<p class="p1">// labelsをランダムに並び替えた配列</p>
+<p class="p1">function shuffle(array) {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const arr = array.slice();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>for(let i = arr.length -1; i &gt; 0; i--){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const j = Math.floor(Math.random() * (i+1));</p>
+<p class="p1"><span class="Apple-converted-space">    </span>[arr[i], arr[j]] = [arr[j], arr[i]];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>return arr;</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">const randomLabels = shuffle(labels);</p>
+<p class="p2"><br></p>
+<p class="p1">const table = document.getElementById('table');</p>
+<p class="p1">const n = labels.length;</p>
+<p class="p2"><br></p>
+<p class="p1">// ヘッダー行（ランダム並び）</p>
+<p class="p1">let tr = document.createElement('tr');</p>
+<p class="p1">tr.appendChild(document.createElement('th'));<span class="Apple-converted-space">  </span>// 左上空白セル</p>
+<p class="p1">for(let i=0; i&lt;n; i++){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const th = document.createElement('th');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>th.textContent = randomLabels[i];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tr.appendChild(th);</p>
+<p class="p1">}</p>
+<p class="p1">table.appendChild(tr);</p>
+<p class="p2"><br></p>
+<p class="p1">// 入力セルの作成（下三角・対角線は入力不可）</p>
+<p class="p1">for(let i=0; i&lt;n; i++){</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let tr = document.createElement('tr');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const th = document.createElement('th');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>th.textContent = randomLabels[i];</p>
+<p class="p1"><span class="Apple-converted-space">  </span>tr.appendChild(th);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>for(let j=0; j&lt;n; j++){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const td = document.createElement('td');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>if(j &lt; i){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const select = document.createElement('select');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>select.id = `cell-${i}-${j}`;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>select.required = true;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>// 空白選択肢（必須なので送信不可にするため）</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const emptyOption = document.createElement('option');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>emptyOption.value = '';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>emptyOption.textContent = '';</p>
+<p class="p1"><span class="Apple-converted-space">      </span>select.appendChild(emptyOption);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>for(let val=0; val&lt;=3; val++){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const option = document.createElement('option');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>option.value = val;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>option.textContent = val;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>select.appendChild(option);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>td.appendChild(select);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>td.textContent = '';</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>tr.appendChild(td);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>table.appendChild(tr);</p>
+<p class="p1">}</p>
+<p class="p2"><br></p>
+<p class="p1">// 送信時処理</p>
+<p class="p1">document.getElementById('form').addEventListener('submit', e =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">  </span>e.preventDefault();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>const studentId = document.getElementById('studentId').value.trim();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>if(!/^\d{4}$/.test(studentId)){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>alert('生徒番号は4桁の数字で入力してください。');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 入力の必須チェック（全入力selectが空じゃないか）</p>
+<p class="p1"><span class="Apple-converted-space">  </span>for(let i=0; i&lt;n; i++){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>for(let j=0; j&lt;n; j++){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(j &lt; i){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const val = document.getElementById(`cell-${i}-${j}`).value;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if(val === ''){</p>
+<p class="p1"><span class="Apple-converted-space">          </span>alert('すべての入力を埋めてください。');</p>
+<p class="p1"><span class="Apple-converted-space">          </span>return;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// randomLabels → ラベル名 → 元のlabelsのインデックスを対応付け</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const labelToIndex = {};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>labels.forEach((lab, idx) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>labelToIndex[lab] = idx;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// randomLabelsでのインデックス→元labelsでのインデックスの対応を作成</p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 逆に元labelsのi,jの位置の値をrandomLabelsのi',j'の入力から取得したい</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const randomLabelToRandomIndex = {};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>randomLabels.forEach((lab, idx) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>randomLabelToRandomIndex[lab] = idx;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// CSVヘッダー</p>
+<p class="p1"><span class="Apple-converted-space">  </span>let csv = '生徒番号,' + labels.join(',') + '\n';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// 行（元ラベル順）ループ</p>
+<p class="p1"><span class="Apple-converted-space">  </span>for(let i=0; i&lt;n; i++){</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let rowLabel = labels[i];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>let row = [studentId];<span class="Apple-converted-space">  </span>// 先頭に生徒番号だけは一度だけつける</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 列ループ（元ラベル順）</p>
+<p class="p1"><span class="Apple-converted-space">    </span>for(let j=0; j&lt;n; j++){</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(j === 0) row = [studentId]; // 生徒番号は先頭列のみ</p>
+<p class="p1"><span class="Apple-converted-space">      </span>if(j === i){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>row.push('');<span class="Apple-converted-space">  </span>// 対角線は空欄</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else if(j &lt; i){</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 下三角部分： j &lt; i</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 元のlabels[i],labels[j]の位置の入力をrandomLabelsの対応箇所から取得</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 元ラベル i,j → randomLabels上の i', j' を探す</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const iPrime = randomLabelToRandomIndex[labels[i]];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const jPrime = randomLabelToRandomIndex[labels[j]];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const val = document.getElementById(`cell-${iPrime}-${jPrime}`).value;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>row.push(val);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// 上三角は空欄</p>
+<p class="p1"><span class="Apple-converted-space">        </span>row.push('');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>csv += row.join(',') + '\n';</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>// CSVファイル生成＆ダウンロード</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const blob = new Blob([csv], {type: 'text/csv'});</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const url = URL.createObjectURL(blob);</p>
+<p class="p1"><span class="Apple-converted-space">  </span>const a = document.createElement('a');</p>
+<p class="p1"><span class="Apple-converted-space">  </span>a.href = url;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>a.download = `relatedness_${studentId}.csv`;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>a.click();</p>
+<p class="p1"><span class="Apple-converted-space">  </span>URL.revokeObjectURL(url);</p>
+<p class="p1">});</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
