@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>数学と理科の関連性についての調査</title>
   <style>
+    /* ページ全体の基本フォント */
     body {
       font-family: 'Arial', 'Helvetica', sans-serif;
       font-size: 1em;
     }
-    .question-label {
-      font-size: 1em;
-    }
+    /* 質問ラベルのフォントサイズ */
+    .question-label { font-size: 1em; }
+    /* テーブルの見た目設定 */
     table {
       border-collapse: collapse;
       width: 100%;
@@ -22,46 +23,40 @@
       padding: 8px;
       text-align: center;
     }
+    /* 入力不可セルの背景色 */
     .disabled {
       background-color: #ddd;
       pointer-events: none;
     }
+    /* ボタン共通スタイル */
     button {
       margin-top: 20px;
       padding: 10px;
       cursor: pointer;
     }
+    /* 入力エラー時の強調 */
     select.error, input.error {
       border: 2px solid red;
       background-color: #fdd;
     }
-    /* 確認画面用エリア */
-    #preview {
+    /* 確認画面と出力画面の共通設定 */
+    #preview, #outputData {
       display: none;
       border: 1px solid #999;
       padding: 10px;
       margin-top: 20px;
-      background-color: #eef;
     }
-    /* 出力データ用エリア */
-    #outputData {
-      display: none;
-      border: 1px solid #999;
-      padding: 10px;
-      margin-top: 20px;
-      background-color: #efe;
-    }
-    /* プレビュー・出力用テキストエリア */
-    textarea {
-      width: 100%;
-      height: 100px;
-      font-size: 1em;
-    }
+    /* 確認画面の背景色 */
+    #preview { background-color: #eef; }
+    /* 出力データ画面の背景色 */
+    #outputData { background-color: #efe; }
+    /* テキストエリアのサイズ */
+    textarea { width: 100%; height: 100px; font-size: 1em; }
   </style>
   <script>
-    // 新しい概念ラベル順（CSV 出力時の並び替え用）
+    // 出力用の「固定順」ラベルリスト（元の並び替え順）
     const originalLabels = [
-      "変位",
+      "位置",
       "速度",
       "加速度",
       "等速直線運動",
@@ -74,200 +69,168 @@
       "2次関数"
     ];
     
-    let shuffledLabels = []; // 入力画面用：ランダムな並び順を保持
-    
+    // ラベルをシャッフルして入力画面に使うための配列
+    let shuffledLabels = [];
+
     document.addEventListener("DOMContentLoaded", function() {
-      // 入力画面では、概念ラベルをシャッフルした順で表示
+      // シャッフル順を作成
       shuffledLabels = [...originalLabels].sort(() => Math.random() - 0.5);
       
-      let tableHTML = "<table><tr><th></th>";
-      shuffledLabels.forEach(label => {
-        tableHTML += `<th>${label}</th>`;
-      });
-      tableHTML += "</tr>";
-      
-      // 下三角部（対角未満）のみをselect入力にする
-      shuffledLabels.forEach((label, rowIndex) => {
-        tableHTML += `<tr><th>${label}</th>`;
-        shuffledLabels.forEach((_, colIndex) => {
-          if (colIndex < rowIndex) {
-            tableHTML += `<td>
-              <select required>
-                <option value=""></option>
-                <option value="0">0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-              </select>
-            </td>`;
+      // 入力テーブルを動的生成
+      let html = "<table><tr><th></th>";
+      shuffledLabels.forEach(l => html += `<th>${l}</th>`);
+      html += "</tr>";
+      shuffledLabels.forEach((l, i) => {
+        html += `<tr><th>${l}</th>`;
+        shuffledLabels.forEach((_, j) => {
+          if (j < i) {
+            // 下三角部には選択肢プルダウン
+            html += `<td><select required>
+                       <option value=""></option>
+                       <option value="0">0</option>
+                       <option value="1">1</option>
+                       <option value="2">2</option>
+                       <option value="3">3</option>
+                     </select></td>`;
           } else {
-            tableHTML += `<td class="disabled">-</td>`;
+            // 上三角部は入力不可
+            html += `<td class="disabled">-</td>`;
           }
         });
-        tableHTML += "</tr>";
+        html += "</tr>";
       });
-      tableHTML += "</table>";
-      document.getElementById("matrix").innerHTML = tableHTML;
+      html += "</table>";
+      document.getElementById("matrix").innerHTML = html;
     });
-    
-    // 入力検証：すべてのselectに0～3の値が選択され、さらに学籍番号が7桁の英数字かチェック
+
+    // 入力内容の妥当性チェック（0～3の選択と学籍番号形式）
     function validateInputs() {
       let valid = true;
-      const selects = document.querySelectorAll("td select");
-      selects.forEach(select => {
-        const val = select.value.trim();
-        if (!/^[0-3]$/.test(val)) {
-          select.classList.add("error");
+      document.querySelectorAll("td select").forEach(s => {
+        if (!/^[0-3]$/.test(s.value)) {
+          s.classList.add("error");
           valid = false;
         } else {
-          select.classList.remove("error");
+          s.classList.remove("error");
         }
       });
-      
-      const studentIdInput = document.getElementById("studentId");
-      const studentValue = studentIdInput.value.trim();
-      if (!/^[A-Za-z0-9]{7}$/.test(studentValue)) {
-        studentIdInput.classList.add("error");
+      let id = document.getElementById("studentId");
+      if (!/^[A-Za-z0-9]{7}$/.test(id.value.trim())) {
+        id.classList.add("error");
         valid = false;
       } else {
-        studentIdInput.classList.remove("error");
+        id.classList.remove("error");
       }
-      
       if (!valid) {
         alert("入力にエラーがあります．０～３の選択肢および7桁の英数字の学籍番号を正しく入力してください．");
       }
       return valid;
     }
-    
-    // 確認画面：入力内容を、そのままシャッフルされた順で表示する（確認用テーブル）
+
+    // 確認画面を表示（入力時と同じシャッフル順でレビュー）
     function confirmPreview() {
       if (!validateInputs()) return;
-      
-      const studentId = document.getElementById("studentId").value.trim();
-      
-      // 入力内容を集約：下三角のselect値をシャッフル順に記録
-      let dataMatrix = Array(shuffledLabels.length).fill(null).map(() =>
-        Array(shuffledLabels.length).fill("-")
-      );
-      const rows = document.querySelectorAll("table tr");
-      for (let i = 1; i < rows.length; i++) {
-        const selects = rows[i].querySelectorAll("td select");
-        selects.forEach((cell, j) => {
-          dataMatrix[j][i - 1] = cell.value.trim();
+      let sid = document.getElementById("studentId").value.trim();
+
+      // 入力値を行列に集約
+      let mat = Array(shuffledLabels.length).fill().map(() => Array(shuffledLabels.length).fill("-"));
+      document.querySelectorAll("table tr").forEach((tr, i) => {
+        if (i === 0) return;  // ヘッダー行はスキップ
+        tr.querySelectorAll("td select").forEach((s, j) => {
+          mat[j][i - 1] = s.value;
         });
-      }
-      
-      // 確認画面用テーブル（入力時と同じシャッフル順）
-      let previewHTML = "<h3>回答内容の確認</h3>";
-      previewHTML += "<p><strong>学籍番号：</strong>" + studentId + "</p>";
-      previewHTML += "<table><tr><th></th>";
-      shuffledLabels.forEach(label => {
-         previewHTML += `<th>${label}</th>`;
       });
-      previewHTML += "</tr>";
-      
-      for (let i = 0; i < shuffledLabels.length; i++) {
-         previewHTML += `<tr><th>${shuffledLabels[i]}</th>`;
-         for (let j = 0; j < shuffledLabels.length; j++) {
-           if (j < i) {
-             previewHTML += `<td><input type="text" value="${dataMatrix[j][i]}" disabled class="preview-field"></td>`;
-           } else {
-             previewHTML += "<td>-</td>";
-           }
-         }
-         previewHTML += "</tr>";
-      }
-      previewHTML += "</table>";
-      
-      // 確認画面下部に「データを出力」「修正する」ボタンを追加
-      previewHTML += "<br><button onclick='outputData()'>データを出力</button> ";
-      previewHTML += "<button onclick='hidePreview()'>修正する</button>";
-      
-      let previewDiv = document.getElementById("preview");
-      previewDiv.innerHTML = previewHTML;
-      previewDiv.style.display = "block";
-      previewDiv.scrollIntoView({ behavior: "smooth" });
+
+      // プレビュー用テーブルを生成
+      let html = `<h3>回答内容の確認</h3>
+                  <p><strong>学籍番号：</strong>${sid}</p>
+                  <table><tr><th></th>`;
+      shuffledLabels.forEach(l => html += `<th>${l}</th>`);
+      html += `</tr>`;
+      shuffledLabels.forEach((l, i) => {
+        html += `<tr><th>${l}</th>`;
+        shuffledLabels.forEach((_, j) => {
+          html += j < i
+            ? `<td><input type="text" value="${mat[j][i]}" disabled class="preview-field"></td>`
+            : `<td>-</td>`;
+        });
+        html += `</tr>`;
+      });
+      html += `<br><button onclick="outputData()">データを出力</button>
+               <button onclick="hidePreview()">修正する</button>`;
+
+      let prev = document.getElementById("preview");
+      prev.innerHTML = html;
+      prev.style.display = "block";
+      document.getElementById("outputData").style.display = "none";
+      prev.scrollIntoView({ behavior: "smooth" });
     }
-    
+
+    // 確認画面を閉じて入力画面に戻す
     function hidePreview() {
       document.getElementById("preview").style.display = "none";
       document.getElementById("outputData").style.display = "none";
     }
-    
-    // データを出力：入力内容を元の概念ラベル順に並び替え、下三角値を取り出して1行のカンマ区切りベクトルにする
+
+    // 元の順序に並び替えた上で、下三角部の値を1行ベクトル化して出力
     function outputData() {
-      // 再度、入力内容を集約
-      let dataMatrix = Array(shuffledLabels.length).fill(null).map(() =>
-        Array(shuffledLabels.length).fill("-")
-      );
-      const rows = document.querySelectorAll("table tr");
-      for (let i = 1; i < rows.length; i++) {
-        const selects = rows[i].querySelectorAll("td select");
-        selects.forEach((cell, j) => {
-          dataMatrix[j][i - 1] = cell.value.trim();
+      // 入力値を再集約
+      let mat = Array(shuffledLabels.length).fill().map(() => Array(shuffledLabels.length).fill("-"));
+      document.querySelectorAll("table tr").forEach((tr, i) => {
+        if (i === 0) return;
+        tr.querySelectorAll("td select").forEach((s, j) => {
+          mat[j][i - 1] = s.value;
         });
-      }
-      
-      // 元の概念ラベル順に並び替えるためのマッピング
-      let orderMapping = originalLabels.map(label => shuffledLabels.indexOf(label));
-      
-      // 下三角（行 > 列）の値を、元の順序に則って取り出す
-      let arrangedVector = [];
-      for (let origRow = 0; origRow < originalLabels.length; origRow++) {
-        for (let origCol = 0; origCol < origRow; origCol++) {
-          let posRow = orderMapping[origRow];
-          let posCol = orderMapping[origCol];
-          let rowIndex = Math.max(posRow, posCol);
-          let colIndex = Math.min(posRow, posCol);
-          arrangedVector.push(dataMatrix[colIndex][rowIndex]);
+      });
+
+      // シャッフル順→固定順のマッピング
+      let map = originalLabels.map(l => shuffledLabels.indexOf(l));
+
+      // 下三角部を固定順で取り出しベクトルに
+      let vec = [];
+      originalLabels.forEach((_, r) => {
+        for (let c = 0; c < r; c++) {
+          let i = map[r], j = map[c];
+          let row = Math.max(i, j), col = Math.min(i, j);
+          vec.push(mat[col][row]);
         }
-      }
-      
-      let vectorText = arrangedVector.join(",");
-      
-      let outputDiv = document.getElementById("outputData");
-      outputDiv.innerHTML = `
-        <h3>出力データ</h3>
-        <textarea id="finalOutput">${vectorText}</textarea>
-        <br><button onclick="copyFinalOutput()">ベクトルをコピー</button>
-      `;
-      outputDiv.style.display = "block";
-      outputDiv.scrollIntoView({ behavior: "smooth" });
+      });
+      let txt = vec.join(",");
+
+      // 出力画面に表示・コピー可能に
+      let out = document.getElementById("outputData");
+      out.innerHTML = `<h3>出力データ</h3>
+                       <textarea id="finalOutput">${txt}</textarea>
+                       <br><button onclick="copyFinal()">ベクトルをコピー</button>`;
+      out.style.display = "block";
+      out.scrollIntoView({ behavior: "smooth" });
     }
-    
+
     // コピー機能
-    function copyFinalOutput() {
+    function copyFinal() {
       let ta = document.getElementById("finalOutput");
       ta.select();
       document.execCommand("copy");
-      alert("ベクトルをコピーしました！");
+      alert("ベクトルをコピーしました．");
     }
   </script>
 </head>
 <body>
   <h2>数学と理科の関連性についての調査</h2>
-  <p>
-    調査にご協力いただきありがとうございます．この調査は，数学と理科の関連性について調べるために行うものです．正しい答えや間違った答えはありませんので，思ったとおりに答えてください．回答はすべてコンピュータにより統計的に処理されますので，個人が特定されることはありません．また，回答が研究目的以外に使用されることはありません．
-  </p>
-  
+  <p>調査にご協力いただきありがとうございます．この調査は，数学と理科の関連性について調べるために行うものです．正しい答えや間違った答えはありませんので，思ったとおりに答えてください．回答はすべてコンピュータにより統計的に処理されますので，個人が特定されることはありません．また，回答が研究目的以外に使用されることはありません．</p>
+
   <label for="studentId" class="question-label">
     <strong>あなたの学籍番号を入力してください（7桁の英数字）：</strong>
   </label>
   <input type="text" id="studentId" maxlength="7" pattern="[A-Za-z0-9]{7}" required>
-  
+
   <h3 class="question-label"><strong>以下の単語や数式同士にはどのくらい関係があると思いますか？</strong></h3>
-  <p class="question-label">
-    関係があると思う度合いを「関係がない：0～関係がある：3」の4段階で表に入力してください．
-  </p>
-  
+  <p class="question-label">関係があると思う度合いを「関係がない：0～関係がある：3」の4段階で表に入力してください．</p>
+
   <div id="matrix"></div>
-  
   <button onclick="confirmPreview()">回答を確認する</button>
-  
-  <!-- 確認画面エリア -->
+
   <div id="preview"></div>
-  
-  <!-- 出力データエリア -->
   <div id="outputData"></div>
 </body>
 </html>
