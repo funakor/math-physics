@@ -32,11 +32,6 @@
       padding: 10px;
       cursor: pointer;
     }
-    .signature {
-      text-align: right;
-      margin-top: 40px;
-      line-height: 1.5;
-    }
     /* エラー表示 */
     select.error, input.error {
       border: 2px solid red;
@@ -59,26 +54,25 @@
     }
   </style>
   <script>
-    // 固定の概念ラベル順（CSV 出力時の並び順用）
+    // 新しい概念ラベル順（CSV 出力時の並び替え用）
     const originalLabels = [
-      "フックの法則",
-      "ばねの伸び=ばね定数×力の大きさ",
-      "オームの法則",
-      "電圧=電流×電気抵抗",
+      "変位",
+      "速度",
+      "加速度",
       "等速直線運動",
-      "移動距離=速さ×時間",
-      "比例",
-      "y=ax",
-      "変化の割合",
-      "傾き",
-      "表",
-      "グラフ"
+      "等加速度運動",
+      "鉛直投射",
+      "斜方投射",
+      "y=ax+b",
+      "y=ax^2+bx+c",
+      "1次関数",
+      "2次関数"
     ];
     
-    let shuffledLabels = []; // ランダム順を保持
+    let shuffledLabels = []; // 入力画面用：ランダムな並び順を保持
     
     document.addEventListener("DOMContentLoaded", function() {
-      // ラベルをランダムに並び替え（行と列は同じ順＝シャッフル順で表示）
+      // ラベルをランダムに並び替え（行と列は同じシャッフル順で表示）
       shuffledLabels = [...originalLabels].sort(() => Math.random() - 0.5);
       
       let tableHTML = "<table><tr><th></th>";
@@ -112,7 +106,7 @@
       document.getElementById("matrix").innerHTML = tableHTML;
     });
     
-    // 入力検証：全ての select に 0～3 の値が選択されているか、生徒番号が 4 桁かチェック
+    // 入力検証：すべての select に 0～3 の値が選択されているか、生徒番号（学籍番号）が7桁の英数字かチェック
     function validateInputs() {
       let valid = true;
       const selects = document.querySelectorAll("td select");
@@ -128,7 +122,8 @@
       
       const studentIdInput = document.getElementById("studentId");
       const studentValue = studentIdInput.value.trim();
-      if (!/^\d{4}$/.test(studentValue)) {
+      // 7桁の英数字（大文字・小文字を問わず）
+      if (!/^[A-Za-z0-9]{7}$/.test(studentValue)) {
         studentIdInput.classList.add("error");
         valid = false;
       } else {
@@ -136,7 +131,7 @@
       }
       
       if (!valid) {
-        alert("入力にエラーがあります．０～３の選択肢および４桁の生徒番号を正しく入力してください．");
+        alert("入力にエラーがあります．０～３の選択肢および7桁の英数字の学籍番号を正しく入力してください．");
       }
       return valid;
     }
@@ -146,7 +141,7 @@
       if (!validateInputs()) return;
       
       const studentId = document.getElementById("studentId").value.trim();
-      // 入力内容を集約：下三角に select の値が記録される形
+      // 入力内容を集約：下三角に select の値を記録（シャッフル順）
       let dataMatrix = Array(shuffledLabels.length).fill(null).map(() =>
         Array(shuffledLabels.length).fill("-")
       );
@@ -161,7 +156,7 @@
       
       // 確認用テーブルは、入力画面と同じシャッフル順で表示
       let previewHTML = "<h3>回答内容の確認</h3>";
-      previewHTML += "<p><strong>生徒番号：</strong>" + studentId + "</p>";
+      previewHTML += "<p><strong>学籍番号：</strong>" + studentId + "</p>";
       previewHTML += "<table><tr><th></th>";
       shuffledLabels.forEach(label => {
          previewHTML += `<th>${label}</th>`;
@@ -195,7 +190,7 @@
       document.getElementById("preview").style.display = "none";
     }
     
-    // CSV 出力関数：最終的には、元の概念ラベル順（originalLabels順）に戻して CSV 出力
+    // CSV 出力関数：最終的には、元の概念ラベル順（originalLabels順）に並び替えて CSV 出力
     function downloadCSV() {
       if (!validateInputs()) return;
       
@@ -234,10 +229,9 @@
         csvContent += rowArr.join(",") + "\n";
       }
       
-      // ダウンロードするファイル名は "math_physics_survey_生徒番号.csv"
+      // ダウンロードするファイル名は "math_physics_survey_学籍番号.csv"
       let fileName = "math_physics_survey_" + studentId + ".csv";
       
-      // Blob の MIME タイプは "text/csv" に設定
       let blob = new Blob([csvContent], { type: "text/csv" });
       let a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
@@ -254,8 +248,8 @@
     調査にご協力いただきありがとうございます．この調査は，数学と理科の関連性について調べるために行うものです．正しい答えや間違った答えはありませんので，思ったとおりに答えてください．回答はすべてコンピュータにより統計的に処理されますので，個人が特定されることはありません．また，回答が研究目的以外に使用されることはありません．
   </p>
   
-  <label for="studentId" class="question-label"><strong>あなたの生徒番号を入力してください（4桁）：</strong></label>
-  <input type="text" id="studentId" maxlength="4" pattern="\d{4}" required>
+  <label for="studentId" class="question-label"><strong>あなたの学籍番号を入力してください（7桁の英数字）：</strong></label>
+  <input type="text" id="studentId" maxlength="7" pattern="[A-Za-z0-9]{7}" required>
   
   <h3 class="question-label"><strong>以下の単語や数式同士にはどのくらい関係があると思いますか？</strong></h3>
   <p class="question-label">関係があると思う度合いを「関係がない：0～関係がある：3」の4段階で表に入力してください．</p>
@@ -267,11 +261,5 @@
   
   <!-- 確認画面エリア -->
   <div id="preview"></div>
-  
-  <div class="signature">
-    <p>カリタス女子中学高等学校</p>
-    <p>舩越 亮太</p>
-    <p>funakoshir@caritas.ed.jp</p>
-  </div>
 </body>
 </html>
